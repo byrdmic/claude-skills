@@ -120,23 +120,21 @@ Decide what to do based on the review results:
 2. Analyze the staged changes and generate a meaningful commit message.
    - If `$ARGUMENTS` is provided and non-empty, use it as the commit message instead.
 3. Run `git commit` with the message, following the git commit best practices described in your Bash tool instructions.
-4. Run `git push` to push to the current branch.
-5. Confirm success to the user with the commit hash and branch name.
-6. Generate release notes and update the changelog:
+4. Generate release notes and update the changelog **before pushing** (so everything ships in one push):
 
-### 6a — Generate Release Notes
+### 4a — Generate Release Notes
 
 Compose 1–4 bullet points describing what was added, changed, fixed, or removed. Write in plain, changelog-style language (not file names or technical diffs).
 
-### 6b — Check for Git Tags
+### 4b — Check for Git Tags
 
 Run `git tag --sort=-v:refname | head -5` to find the most recent tags. If tags exist, note the latest one for context in the changelog entry header. If no tags exist, skip this — do not create tags.
 
-### 6c — Check for a Changelog File
+### 4c — Check for a Changelog File
 
 Determine the repo root by running `git rev-parse --show-toplevel`. Then check if the file `CHANGELOG.md` exists at that root using the Read tool. That's it — only look for `CHANGELOG.md` in the repo root. Do not search anywhere else.
 
-**If a changelog file exists:**
+**If `CHANGELOG.md` exists:**
 - Read the file to understand its existing format and structure.
 - **Check if an entry for today's date already exists** (e.g. a `## 2026-02-10` or `## [v1.2.3] - 2026-02-10` header). Compare dates only — ignore version tags when checking for a match.
 
@@ -165,17 +163,22 @@ If no entry for today exists yet:
 ```
 
 - Use the Edit tool to insert or append. Do NOT rewrite or reorder existing entries.
-- Amend the commit to include the changelog update: stage the changelog file with `git add <changelog-file>` and run `git commit --amend --no-edit`, then `git push --force-with-lease`.
+- Stage the changelog: `git add CHANGELOG.md` then `git commit --amend --no-edit` to fold it into the same commit.
 
-**If NO changelog file exists:**
+**If `CHANGELOG.md` does NOT exist:**
 - Do NOT create one automatically.
 - Include this note in your response: "No changelog file found in the repo. If you create one (e.g. `CHANGELOG.md`), I'll automatically update it on future runs."
 
-### 6d — Output Release Notes
+### 4d — Push
+
+5. Run `git push` to push to the current branch. This is the **only push** — everything (code changes + changelog update) ships in a single push.
+6. Confirm success to the user with the commit hash and branch name.
+
+### 4e — Output Release Notes
 
 Always output the release notes in the response regardless of whether a changelog was updated:
 
 ```
 **Release Notes**
-- <bullet points from 6a>
+- <bullet points from 4a>
 ```
